@@ -3,11 +3,14 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { RouterOutlet } from '@angular/router';
 import { Employee } from './model/Employee';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { ToastalertComponent } from './components/toastalert/toastalert.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ReactiveFormsModule, CommonModule],
+  imports: [RouterOutlet, ReactiveFormsModule, CommonModule,MatCardModule,ToastalertComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -17,9 +20,14 @@ export class AppComponent {
   employeeObj: Employee = new Employee();
   employeeList: Employee[] = [];
 
-  constructor() {    
+
+  constructor(private toastr:ToastrService) {    
     this.createForm();
     this.employeeList = JSON.parse(localStorage.getItem('employeeData') || '[]');
+  }
+
+  showSuccess() {
+    this.toastr.success('Saved successfully!', 'Success', {closeButton: true, progressBar: true,positionClass: 'toast-top-center',timeOut: 4000});
   }
 
   createForm() {
@@ -41,6 +49,7 @@ export class AppComponent {
         const maxId = parsedData.reduce((max: number, emp: Employee) => emp.id > max ? emp.id : max, 0);
         this.employeeFormGroup.controls['id'].setValue(maxId + 1);
         this.employeeList.push(this.employeeFormGroup.value);
+        this.showSuccess();
     } else {
         // If no data exists, start with ID 1
         this.employeeFormGroup.controls['id'].setValue(1);
@@ -70,6 +79,7 @@ export class AppComponent {
         this.employeeList.splice(index, 1);
       }
       localStorage.setItem('employeeData', JSON.stringify(this.employeeList));
+      this.showSuccess();
     }    
   }
 
@@ -80,6 +90,7 @@ export class AppComponent {
     }   
     localStorage.setItem('employeeData', JSON.stringify(this.employeeList));    
     this.onReset();
+    this.showSuccess();
   }
  
 }
